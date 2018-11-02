@@ -1,3 +1,4 @@
+-- Querying Multiple Tables with Joins Begin
 Select P.Name, P.ProductNumber, PS.Name AS [ProductSubCategory Name] from Production.Product P 
 Inner Join Production.ProductSubcategory PS 
 ON P.ProductSubcategoryID = PS.ProductSubcategoryID
@@ -34,3 +35,92 @@ LEFT OUTER JOIN Sales.SalesTerritory T
 ON T.TerritoryID = SOH.TerritoryID
 WHERE T.Name = 'Northwest'
 ORDER BY TotalDue DESC
+
+--Querying Multiple Tables with Joins End
+
+-- Aggregate Functions Begin
+
+SELECT MAX(TotalDue) AS MaxTotalDue FROM Sales.SalesOrderHeader
+
+SELECT SalesPersonID FROM Sales.SalesOrderHeader WHERE SalesPersonID IS NOT NULL
+
+SELECT COUNT(FirstName) from Person.Person -- all datas
+
+SELECT COUNT(Distinct FirstName) from Person.Person -- ignore duplicate datas
+
+SELECT AVG(TotalDue) from Sales.SalesOrderHeader -- Average
+
+SELECT SUM(TotalDue) from Sales.SalesOrderHeader -- Sum
+
+SELECT SUM(TotalDue) from Sales.SalesOrderHeader
+WHERE OrderDate Between '5/31/2011' AND '6/6/2011'
+
+-- Aggregate Functions End
+
+-- Grouping Data with the GROUP by Clause Begin
+
+SELECT SalesPersonID ,SUM(TotalDue) AS [Total Sales] FROM Sales.SalesOrderHeader
+GROUP BY SalesPersonID
+
+SELECT ProductID, SUM(Quantity) AS [Total in stock], Count(*) AS [Total Locations] FROM Production.ProductInventory 
+GROUP BY ProductID
+
+SELECT 
+ST.Name AS [Terrority Name],
+P.FirstName + ' ' + P.LastName AS SalesPersonName, 
+SUM(TotalDue) AS [Total Sales] 
+FROM Sales.SalesOrderHeader SOH
+INNER JOIN Sales.SalesPerson SP 
+ON SP.BusinessEntityID = SOH.SalesPersonID
+INNER JOIN Person.Person P 
+ON P.BusinessEntityID = SP.BusinessEntityID
+INNER JOIN Sales.SalesTerritory ST 
+ON ST.TerritoryID = SOH.TerritoryID
+WHERE OrderDate Between '5/31/2011' AND '6/6/2011'
+GROUP BY ST.Name, P.FirstName + ' ' + P.LastName
+ORDER BY 1, 2
+-- Grouping Data with the GROUP by Clause End
+
+
+-- Filtering Groups with the HAVING Clause Begin
+SELECT 
+	ST.Name AS [Terrority Name],
+	SUM(TotalDue) AS [Total Sales - 2011]
+FROM Sales.SalesOrderHeader SOH 
+INNER JOIN Sales.SalesTerritory ST 
+ON ST.TerritoryID = SOH.TerritoryID
+WHERE OrderDate Between '5/31/2011' AND '6/6/2011'
+GROUP BY St.Name
+HAVING SUM(TotalDue) > 133333
+ORDER BY St.Name
+
+SELECT PS.Name AS [SubCategory Name], COUNT(*) AS [Product Count] 
+FROM Production.Product P
+INNER JOIN Production.ProductSubcategory PS
+ON PS.ProductSubcategoryID = p.ProductSubcategoryID
+GROUP BY PS.Name
+HAVING COUNT(*) >= 10
+ORDER BY 1
+
+SELECT 
+	Department AS [Departman Name],
+	COUNT (*) AS [Employee Count]
+FROM HumanResources.vEmployeeDepartment
+GROUP BY Department
+HAVING COUNT(*) IN (6, 7, 10)
+
+
+SELECT 
+	SalesPersonID,
+	SUM(TotalDue) AS [Total Sales Amount],
+	COUNT(*) AS [Total Sales Count]
+FROM Sales.SalesOrderHeader 
+WHERE OrderDate Between '1/1/2011' AND '12/31/2011'
+AND SalesPersonID IS NOT NULL
+GROUP BY SalesPersonID 
+HAVING SUM(TotalDue) > 150000 
+AND COUNT(*) > 50
+ORDER BY [Total Sales Amount] DESC
+
+-- Filtering Groups with the HAVING Clause End
+
