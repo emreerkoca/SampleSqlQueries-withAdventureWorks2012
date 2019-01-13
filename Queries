@@ -124,3 +124,29 @@ ORDER BY [Total Sales Amount] DESC
 
 -- Filtering Groups with the HAVING Clause End
 
+--Excercises (Using AdwentureWorks db)
+
+-- SELECT STATEMENT PRACTICE
+
+-- 1) Retrieve all rows from the HumanResources.Employee table. Return only the NationallDNumber column.
+
+Select NationalIDNumber from HumanResources.Employee
+
+-- 2) Retrieve the top 20 percent of rows from the HumanResources.Employee table.
+-- Return the NationalDNumber, JobTitle and BirthDate columns. Give the NationallDNumber column an alias: "SSN"
+
+Select TOP (20) PERCENT NationalIDNumber as SSN, JobTitle, BirthDate from HumanResources.Employee 
+
+-- AGGREGATE FUNCTIONS
+
+-- 1) What is the average StandardCost (located in Production.Product) for each product where the StandardCost is greater than $0.00?
+
+Select AVG(StandardCost) AS StandartCostCount from Production.Product Where StandardCost > 0
+
+-- 2) What is the average Freight amount for each sale (found in Sales.SalesOrderHeader)
+
+Select AVG(Freight)  from Sales.SalesOrderHeader Where TerritoryID = 4
+
+-- 3) How expensive is the most expensive product, by ListPrice, in the table Production.Product
+
+Select MAX(ListPrice) from Production.Product
