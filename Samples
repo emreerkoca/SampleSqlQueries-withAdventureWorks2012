@@ -150,3 +150,108 @@ Select AVG(Freight)  from Sales.SalesOrderHeader Where TerritoryID = 4
 -- 3) How expensive is the most expensive product, by ListPrice, in the table Production.Product
 
 Select MAX(ListPrice) from Production.Product
+
+
+-- USE AND GO
+-- You can select database to be processed.
+USE AdventureWorks2012
+GO
+Select TOP(10) * from Production.Product with (NOLOCK)
+
+-- Run script blog more than 1 with go command
+Select TOP(1) * from Production.Product with (NOLOCK)
+GO 2  
+
+-- PRINT using for show information messages
+PRINT 'Hello Word!'
+
+-- CREATE TABLE (Create a table)
+USE DatabaseName 
+GO
+CREATE TABLE SampleTable
+(
+	Id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	UserName NVARCHAR(25) NOT NULL
+);
+
+-- ALTER TABLE (Modify a table)
+ALTER TABLE SampleTable ADD
+	UserPhone NVARCHAR(10) NOT NULL,
+	RegisterDate DATETIME NOT NULL DEFAULT GET_DATE();
+	 
+-- Create new guid
+NEWID();
+
+-------------------------------------
+
+-- Declare variable
+DECLARE @Sample NVARCHAR(20)
+SET @Sample = 'Sample Text';
+PRINT @Sample;
+
+-- SELECT INTO using (Select values, create database (if not exist), add values to new database)
+Select * INTO ProductBackup from Production.Product
+
+-- UNION - UNION ALL
+-- UNION (Combining Query Result. Common values just select once)
+SELECT BusinessEntityID, ModifiedDate, SalesQuota
+	FROM Sales.SalesPerson
+	WHERE SalesQuota > 0
+UNION
+SELECT BusinessEntityID, QuotaDate, SalesQuota
+	FROM Sales.SalesPersonQuotaHistory
+	WHERE SalesQuota > 0
+	ORDER BY BusinessEntityID DESC, ModifiedDate DESC;
+
+-- UNION ALL (Combining query result and ignore common values. Select all rows)
+SELECT BusinessEntityID, ModifiedDate, SalesQuota
+	FROM Sales.SalesPerson
+	WHERE SalesQuota > 0
+UNION
+SELECT BusinessEntityID, QuotaDate, SalesQuota
+	FROM Sales.SalesPersonQuotaHistory
+	WHERE SalesQuota > 0
+	ORDER BY BusinessEntityID DESC, ModifiedDate DESC;
+
+
+-- Like special usings
+-- Records with end 'eflector'
+ SELECT * FROM Production.Product 
+	WHERE Name like '_eflector'
+
+-- Records starts with 'A' or 'C' 
+SELECT * FROM Production.Product 
+	WHERE Name like '[AC]%'
+
+-- Records starts with 'A', 'B', 'C'
+SELECT * FROM Production.Product 
+	WHERE Name like '[A-C]%'
+
+-- Records starts with 'A' but second character is not 'C'
+SELECT * FROM Production.Product 
+	WHERE Name like 'A[^c]%'
+
+
+-- CAST and CONVERT
+-- Cast
+SELECT 'Product Code: ' + CAST(ProductID AS VARCHAR)
+	+ ' - ' 
+	+ 'Product Name: ' + [Name] FROM Production.Product
+
+SELECT CAST(14.54 AS int) 
+	
+-- Convert
+
+SELECT 9.5 AS Original, CONVERT(int, 9.5) AS [int], 
+    CONVERT(decimal(6,4), 9.5) AS decimal;
+
+
+-- FILTERING
+-- IN and NOT IN
+-- IN (Select according write values)
+SELECT * FROM Sales.SalesPerson 
+	WHERE BusinessEntityID IN(274, 275, 276)
+
+-- NOT IN 
+SELECT * FROM Sales.SalesPerson 
+	WHERE BusinessEntityID NOT IN(274, 275, 276)
