@@ -255,3 +255,14 @@ SELECT * FROM Sales.SalesPerson
 -- NOT IN 
 SELECT * FROM Sales.SalesPerson 
 	WHERE BusinessEntityID NOT IN(274, 275, 276)
+
+-- ISNULL function using
+-- ISNULL(ColumnName, Value) if ColumnName is NULL, get column value
+SELECT DiscountPct, Description, MinQty, ISNULL(MaxQty, 0) AS MaxQuantity 
+FROM Sales.SpecialOffer
+
+-- COALESCE function
+-- COALESCE(column1, column2, column3) get is not null first value
+Select [Name],[Class], Color, ProductNumber, 
+	COALESCE(Class, Color, ProductNumber) AS FirstNotNullColumn
+FROM Production.Product
