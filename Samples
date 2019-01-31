@@ -266,3 +266,61 @@ FROM Sales.SpecialOffer
 Select [Name],[Class], Color, ProductNumber, 
 	COALESCE(Class, Color, ProductNumber) AS FirstNotNullColumn
 FROM Production.Product
+
+-- If ListPrice value greater than avarage ListPrice value then get values
+Select ProductID, ProductNumber, ListPrice from Production.Product 
+	Where ListPrice > (Select AVG(ListPrice) from Production.Product)
+
+
+
+-- Declare and set values
+DECLARE @minOrderDate SMALLDATETIME;
+SELECT @minOrderDate = MIN(soh.OrderDate) from Sales.SalesOrderHeader soh;
+SELECT 
+	Distinct soh.OrderDate AS OrderDate,
+	sad.ProductID AS ProductId
+FROM Sales.SalesOrderHeader soh 
+JOIN Sales.SalesOrderDetail sad ON sad.SalesOrderID = soh.SalesOrderID
+Where soh.OrderDate = @minOrderDate
+
+
+-- or SubQuery use
+SELECT 
+	Distinct soh.OrderDate AS OrderDate,
+	sad.ProductID AS ProductId
+FROM Sales.SalesOrderHeader soh 
+JOIN Sales.SalesOrderDetail sad ON sad.SalesOrderID = soh.SalesOrderID
+Where soh.OrderDate = (SELECT MIN(OrderDate) from Sales.SalesOrderHeader)
+
+-- Derived Tables
+-- Find Max CategoryCount 
+SELECT 
+	MAX(AllCategories.SubCategoryCount) AS MaxSubCategoryCount 
+FROM
+	(SELECT 
+	pc.ProductCategoryID,
+	COUNT(psc.ProductSubcategoryID) AS SubCategoryCount 
+	FROM Production.ProductCategory pc
+	INNER JOIN Production.ProductSubcategory psc
+	ON pc.ProductCategoryID = psc.ProductCategoryID
+	GROUP BY pc.ProductCategoryID) AllCategories
+
+
+-- Related SubQueries
+-- Relate Product and ProductSubCategory table. Find products subcategory name
+SELECT 
+	ProductID,
+	Name,
+	ListPrice,
+	(Select Name FROM Production.ProductSubcategory psc 
+		WHERE psc.ProductSubcategoryID = p.ProductSubcategoryID) AS SubCategoryName
+FROM Production.Product p
+
+-- Select First orders, first order dates and first order ids
+SELECT 
+	soh.SalesOrderID,
+	soh.CustomerID,
+	soh.OrderDate FROM Sales.SalesOrderHeader soh 
+	WHERE soh.OrderDate = (SELECT MIN(OrderDate) 
+	FROM Sales.SalesOrderHeader)
+
