@@ -324,3 +324,54 @@ SELECT
 	WHERE soh.OrderDate = (SELECT MIN(OrderDate) 
 	FROM Sales.SalesOrderHeader)
 
+
+
+-- IDENTITY  
+-- Step 1 Run this query
+-- INSERT INTO Productiom.Product.....
+-- Step 2 
+-- Get last inserted value Id
+--SELECT @IDENTITY
+-- or you can use @SCOPE_IDENTITY()      
+
+-- IDENT_CURRENT
+SELECT IDENT_CURRENT('Production.Product'); -- Get last record Id value
+
+-- @ROWCOUNT
+SELECT * FROM Production.Product 
+
+SELECT @@ROWCOUNT AS 'RowCount' -- Get affected row count after database operation
+
+-- @@SERVERNAME
+SELECT @@SERVERNAME -- Get server name
+
+-- UPPER (x = 'abC' UPPER(x) => x = 'ABC')
+SELECT UPPER(Name) FROM Production.Product
+
+-- LOWER (x = 'AbC' LOWER(x) => x = 'abc')
+SELECT LOWER(Name) from Production.Product
+
+-- LEN (Get value length)
+SELECT LEN(Name) FROM Production.Product
+
+-- CEILING
+PRINT CEILING(-98.1) -- -98
+PRINT CEILING($123.22) -- 124.00
+PRINT CEILING(123.22) -- 124
+PRINT CEILING($-123.22) -- -123.00
+PRINT CEILING(-123.22) -- -123.00
+
+
+
+-- COMMON TABLE EXPRESSIONS
+WITH CTEProduct(ProductId, ProductName, Color) AS
+(
+	SELECT ProductID, Name, Color FROM Production.Product 
+	WHERE ProductID > 300 AND Color IS NOT NULL
+)
+UPDATE CTEProduct SET ProductName = 'Example Name'
+WHERE ProductId = 317; 
+
+SELECT ProductID, Name, Color FROM Production.Product
+WHERE ProductID = 317;
+
