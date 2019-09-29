@@ -3,6 +3,9 @@ Select P.Name, P.ProductNumber, PS.Name AS [ProductSubCategory Name] from Produc
 Inner Join Production.ProductSubcategory PS 
 ON P.ProductSubcategoryID = PS.ProductSubcategoryID
 
+-- Left Join P.Key is NULL (like Product except ProductSubCategory)
+Select P.Name, P.ProductNumber, PS.Name AS [ProductSubCategory Name] from Production.Product P LEFT Join Production.ProductSubcategory PS 
+ON P.ProductSubcategoryID = PS.ProductSubcategoryID WHERE P.ProductSubcategoryID is NULL
 
 SELECT PS.Name AS ProductSubcategoryName,
 	   PC.Name AS ProductCategoryName FROM Production.ProductSubcategory PS 
