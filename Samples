@@ -1,3 +1,28 @@
+
+-- @ROWCOUNT
+SELECT * FROM Production.Product; 
+
+SELECT @@ROWCOUNT AS 'RowCount' -- Get affected row count after database operation
+
+-- @@SERVERNAME
+SELECT @@SERVERNAME -- Get server name
+
+-- UPPER (x = 'abC' UPPER(x) => x = 'ABC')
+SELECT UPPER(Name) FROM Production.Product
+
+-- LOWER (x = 'AbC' LOWER(x) => x = 'abc')
+SELECT LOWER(Name) from Production.Product
+
+-- LEN (Get value length)
+SELECT LEN(Name) FROM Production.Product
+
+-- CEILING
+PRINT CEILING(-98.1) -- -98
+PRINT CEILING($123.22) -- 124.00
+PRINT CEILING(123.22) -- 124
+PRINT CEILING($-123.22) -- -123.00
+PRINT CEILING(-123.22) -- -123.00
+
 -- Querying Multiple Tables with Joins Begin
 Select P.Name, P.ProductNumber, PS.Name AS [ProductSubCategory Name] from Production.Product P 
 Inner Join Production.ProductSubcategory PS 
@@ -26,6 +51,24 @@ SELECT P.Name, P.ProductNumber, PS.Name AS ProductSubCategoryName FROM Productio
 RIGHT OUTER JOIN Production.ProductSubcategory PS
 ON P.ProductSubcategoryID = PS.ProductSubcategoryID
 
+-- Write a query that displays all the products along with the SalesOrderID even if an order has never
+-- been placed for that product. Join to the Sales.SalesOrderDetail table using the ProductID column
+SELECT SalesOrderID, P.ProductID, P.Name
+FROM Production.Product AS P
+LEFT OUTER JOIN Sales.SalesOrderDetail
+ AS SOD ON P.ProductID = SOD.ProductID; 
+
+-- Change the query written in question 1 so that only products that have not been ordered show up in the query. 
+SELECT SalesOrderID, P.ProductID, P.Name
+FROM Production.Product AS P
+LEFT OUTER JOIN Sales.SalesOrderDetail
+ AS SOD ON P.ProductID = SOD.ProductID
+WHERE SalesOrderID IS NULL;
+
+-- Write a query that returns the BusinessEntityID column from the Sales.SalesPerson table along
+-- with every ProductID from the Production.Product table. 
+SELECT SP.BusinessEntityID, P.ProductID
+FROM Sales.SalesPerson AS SP CROSS JOIN Production.Product AS P; 
 
 SELECT P.FirstName, P.LastName, SOH.SalesOrderNumber, SOH.TotalDue AS SalesAmount, T.Name AS TerrorityName FROM Sales.SalesOrderHeader SOH
 LEFT OUTER JOIN Sales.SalesPerson SP 
@@ -40,6 +83,33 @@ WHERE T.Name = 'Northwest'
 ORDER BY TotalDue DESC
 
 --Querying Multiple Tables with Joins End
+
+---------------------- Writing Subqueries Start -----------------------
+
+-- Using a subquery, display the product names and product ID numbers from the
+-- Production.Product table that have been ordered.
+
+SELECT ProductID, Name
+FROM Production.Product
+WHERE ProductID IN (SELECT DISTINCT ProductID FROM Sales.SalesOrderDetail); 
+
+-- Change the query written in question 1 to display the products that have not been ordered.
+
+SELECT ProductID, Name
+FROM Production.Product
+WHERE ProductID NOT IN (
+ SELECT DISTINCT ProductID FROM Sales.SalesOrderDetail
+ WHERE ProductID IS NOT NULL); 
+
+-- UNION: The UNION operator is used to combine the result-set of two or more SELECT statements 
+
+SELECT ModifiedDate
+FROM Person.Person
+UNION
+SELECT HireDate
+FROM HumanResources.Employee;
+
+---------------------- Writing Subqueries End -------------------------
 
 -- Aggregate Functions Begin
 
@@ -82,6 +152,13 @@ ON ST.TerritoryID = SOH.TerritoryID
 WHERE OrderDate Between '5/31/2011' AND '6/6/2011'
 GROUP BY ST.Name, P.FirstName + ' ' + P.LastName
 ORDER BY 1, 2
+
+-- Order By with condition
+SELECT PersonType, FirstName, MiddleName, LastName
+FROM Person.Person
+ORDER BY CASE WHEN PersonType IN ('IN','SP','SC') THEN LastName
+ ELSE FirstName END;
+
 -- Grouping Data with the GROUP by Clause End
 
 
@@ -157,7 +234,7 @@ Select MAX(ListPrice) from Production.Product
 
 -- USE AND GO
 -- You can select database to be processed.
-USE AdventureWorks2012
+USE AdventureWorks2016
 GO
 Select TOP(10) * from Production.Product with (NOLOCK)
 
@@ -169,7 +246,7 @@ GO 2
 PRINT 'Hello Word!'
 
 -- CREATE TABLE (Create a table)
-USE DatabaseName 
+USE AdventureWorks2016 
 GO
 CREATE TABLE SampleTable
 (
@@ -183,7 +260,7 @@ ALTER TABLE SampleTable ADD
 	RegisterDate DATETIME NOT NULL DEFAULT GET_DATE();
 	 
 -- Create new guid
-NEWID();
+SELECT NEWID();
 
 -------------------------------------
 
@@ -355,16 +432,7 @@ SELECT UPPER(Name) FROM Production.Product
 SELECT LOWER(Name) from Production.Product
 
 -- LEN (Get value length)
-SELECT LEN(Name) FROM Production.Product
-
--- CEILING
-PRINT CEILING(-98.1) -- -98
-PRINT CEILING($123.22) -- 124.00
-PRINT CEILING(123.22) -- 124
-PRINT CEILING($-123.22) -- -123.00
-PRINT CEILING(-123.22) -- -123.00
-
-
+SELECT LEN(Name) FROM Production.Product;
 
 -- COMMON TABLE EXPRESSIONS
 WITH CTEProduct(ProductId, ProductName, Color) AS
@@ -377,4 +445,66 @@ WHERE ProductId = 317;
 
 SELECT ProductID, Name, Color FROM Production.Product
 WHERE ProductID = 317;
+
+
+
+-- COMMON TABLE EXPRESSIONS
+WITH CTEProduct(ProductId, ProductName, Color) AS
+(
+	SELECT ProductID, Name, Color FROM Production.Product 
+	WHERE ProductID > 300 AND Color IS NOT NULL
+)
+UPDATE CTEProduct SET ProductName = 'Example Name'
+WHERE ProductId = 317;
+
+
+SELECT ProductID, Name, Color FROM Production.Product
+WHERE ProductID = 317;
+
+----------------------------------------------
+-- COALESCE: Return the first non-null value in a list
+SELECT COALESCE(NULL, NULL, 'sample.com', NULL, 'example.com');
+-- sample.com
+
+-- SERVERPROPERTY: Returns property information about the server instance.
+SELECT SERVERPROPERTY('Edition'), SERVERPROPERTY('MachineName');
+
+-- Get row number
+SELECT ROW_NUMBER() OVER(ORDER BY ProductID) AS RowNumber, ProductID, Name, ListPrice FROM Production.Product;
+
+-- Get data randomly
+SELECT TOP 10 * FROM Production.Product ORDER BY NEWID();
+
+-- Get data by approximate percentage value
+SELECT * FROM Production.Product TABLESAMPLE(40 PERCENT);
+
+-- Get data by approximate row count
+SELECT * FROM Production.Product TABLESAMPLE(100 ROWS);
+
+-- REPEATABLE: When you use REPEATABLE you can get first query result every time. 
+-- Otherwise, the query result is being different every time
+SELECT * FROM Production.Product TABLESAMPLE(40 PERCENT) REPEATABLE(40);
+
+SELECT * FROM Production.Product TABLESAMPLE(100 ROWS) REPEATABLE(100);
+
+-- PIVOT
+-- You can see product counts for each color in this example
+SELECT * FROM 
+(
+	SELECT PSC.Name, P.Color, Inventory.Quantity FROM Production.Product P
+	INNER JOIN Production.ProductSubcategory PSC ON PSC.ProductSubcategoryID = P.ProductSubcategoryID
+	LEFT JOIN Production.ProductInventory Inventory ON P.ProductID = Inventory.ProductID 
+) SampleTable
+PIVOT 
+(
+	SUM(Quantity) 
+	FOR Color IN([BLACK], [RED], [BLUE], [SILVER])
+) PivotTable;
+
+
+SELECT JobTitle, BirthDate, FirstName, LastName
+FROM HumanResources.Employee AS E
+INNER JOIN Person.Person AS P ON E.BusinessEntityID = P.BusinessEntityID; 
+
+
 
